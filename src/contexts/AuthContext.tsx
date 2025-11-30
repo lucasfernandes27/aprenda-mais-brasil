@@ -168,6 +168,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (certificate) {
           updatedUser.certificates = [...user.certificates, certificate.id];
+          
+          toast.success("Parabéns! Você concluiu o curso! 🎉", {
+            description: "Seu certificado foi gerado automaticamente.",
+            duration: 5000,
+          });
         }
       }
       
@@ -175,10 +180,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (updatedUser.completedCourses.length === 1 && !updatedUser.unlockedAchievements.includes("3")) {
         setTimeout(() => unlockAchievement("3"), 500);
       }
-
-      toast.success("Parabéns! Você concluiu o curso! 🎉", {
-        description: "Seu certificado foi gerado automaticamente.",
-      });
     }
 
     await updateUserData(updatedUser);
