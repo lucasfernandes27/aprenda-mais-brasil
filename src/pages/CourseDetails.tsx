@@ -8,11 +8,13 @@ import { Clock, BarChart, CheckCircle2, ArrowLeft, PlayCircle, Star } from "luci
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { reviewsService, Review } from "@/services/reviewsService";
+import { progressService } from "@/services/progressService";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import ReviewForm from "@/components/ReviewForm";
 import ReviewList from "@/components/ReviewList";
 import StarRating from "@/components/StarRating";
+import ProgressBar from "@/components/ProgressBar";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -22,14 +24,32 @@ const CourseDetails = () => {
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [averageRating, setAverageRating] = useState({ average: 0, count: 0 });
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [courseProgress, setCourseProgress] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
 
   const course = courses.find((c) => c.id === id);
 
   useEffect(() => {
     if (id) {
       loadReviews();
+      loadProgress();
     }
-  }, [id]);
+  }, [id, user]);
+
+  const loadProgress = async () => {
+    if (!id || !user || !course) return;
+
+    const totalLessons = course.modules.reduce(
+      (total, module) => total + module.lessons.length,
+      0
+    );
+
+    const progress = await progressService.getCourseProgress(user.id, id, totalLessons);
+    setCourseProgress(progress);
+
+    const completedIds = await progressService.getCompletedLessonIds(user.id, id);
+    setCompletedLessons(new Set(completedIds));
+  };
 
   const loadReviews = async () => {
     if (!id) return;
@@ -156,29 +176,38 @@ const CourseDetails = () => {
                       </AccordionTrigger>
                       <AccordionContent>
                         <ul className="space-y-2 ml-11 mt-2">
-                          {module.lessons.map((lesson) => (
-                            <li key={lesson.id}>
-                              <button
-                                onClick={() => {
-                                  if (isEnrolled) {
-                                    navigate(`/curso/${course.id}/modulo/${module.id}/aula/${lesson.id}`);
-                                  }
-                                }}
-                                disabled={!isEnrolled}
-                                className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
-                                  isEnrolled
-                                    ? "hover:bg-muted cursor-pointer"
-                                    : "opacity-50 cursor-not-allowed"
-                                }`}
-                              >
-                                <PlayCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium">{lesson.title}</p>
-                                  <p className="text-xs text-muted-foreground">{lesson.duration}</p>
-                                </div>
-                              </button>
-                            </li>
-                          ))}
+                          {module.lessons.map((lesson) => {
+                            const isCurrent = false;
+                            const isLessonCompleted = completedLessons.has(lesson.id);
+
+                            return (
+                              <li key={lesson.id}>
+                                <button
+                                  onClick={() => {
+                                    if (isEnrolled) {
+                                      navigate(`/curso/${course.id}/modulo/${module.id}/aula/${lesson.id}`);
+                                    }
+                                  }}
+                                  disabled={!isEnrolled}
+                                  className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                                    isEnrolled
+                                      ? "hover:bg-muted cursor-pointer"
+                                      : "opacity-50 cursor-not-allowed"
+                                  }`}
+                                >
+                                  {isLessonCompleted ? (
+                                    <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                                  ) : (
+                                    <PlayCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">{lesson.title}</p>
+                                    <p className="text-xs text-muted-foreground">{lesson.duration}</p>
+                                  </div>
+                                </button>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </AccordionContent>
                     </AccordionItem>
@@ -310,6 +339,9 @@ const CourseDetails = () => {
                       <CheckCircle2 className="w-5 h-5" />
                       <span className="font-medium">Você está matriculado!</span>
                     </div>
+                    {courseProgress > 0 && (
+                      <ProgressBar value={courseProgress} />
+                    )}
                     <Button
                       className="w-full"
                       size="lg"

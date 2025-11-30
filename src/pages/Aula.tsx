@@ -6,26 +6,38 @@ import { ArrowLeft, ArrowRight, CheckCircle2, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { certificatesService } from "@/services/certificatesService";
+import { progressService } from "@/services/progressService";
 import { toast } from "sonner";
 
 const Aula = () => {
   const { courseId, moduleId, lessonId } = useParams();
   const navigate = useNavigate();
-  const { user, updateProgress } = useAuth();
+  const { user, markLessonComplete } = useAuth();
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [currentProgress, setCurrentProgress] = useState(0);
 
   const course = courses.find((c) => c.id === courseId);
   const module = course?.modules.find((m) => m.id === moduleId);
   const lesson = module?.lessons.find((l) => l.id === lessonId);
 
   useEffect(() => {
-    // Carregar lições completadas do localStorage
-    const savedCompleted = localStorage.getItem(`completed_${courseId}`);
-    if (savedCompleted) {
-      setCompletedLessons(new Set(JSON.parse(savedCompleted)));
-    }
-  }, [courseId]);
+    const loadProgress = async () => {
+      if (user && courseId) {
+        const completedIds = await progressService.getCompletedLessonIds(user.id, courseId);
+        setCompletedLessons(new Set(completedIds));
+        
+        // Calcular progresso atual
+        const totalLessons = course?.modules.reduce(
+          (total, m) => total + m.lessons.length,
+          0
+        ) || 0;
+        const progress = await progressService.getCourseProgress(user.id, courseId, totalLessons);
+        setCurrentProgress(progress);
+      }
+    };
+
+    loadProgress();
+  }, [courseId, user, course]);
 
   if (!course || !module || !lesson) {
     return (
@@ -61,34 +73,20 @@ const Aula = () => {
   const prevLesson = allLessons[currentLessonIndex - 1];
 
   const handleMarkAsComplete = async () => {
-    const newCompleted = new Set(completedLessons);
-    newCompleted.add(lessonId!);
-    setCompletedLessons(newCompleted);
+    if (!user || !courseId || !lessonId) return;
+
+    // Marcar aula como completa e obter novo progresso
+    const newProgress = await markLessonComplete(courseId, lessonId);
     
-    // Salvar no localStorage
-    localStorage.setItem(`completed_${courseId}`, JSON.stringify([...newCompleted]));
+    // Atualizar estado local
+    const newCompleted = new Set(completedLessons);
+    newCompleted.add(lessonId);
+    setCompletedLessons(newCompleted);
+    setCurrentProgress(newProgress);
 
-    // Calcular progresso
-    const progress = Math.round((newCompleted.size / allLessons.length) * 100);
-    updateProgress(courseId!, progress);
-
-    // Se concluiu 100%, gerar certificado
-    if (progress === 100 && user) {
-      const certificate = await certificatesService.createCertificate({
-        userId: user.id,
-        courseId: courseId!,
-        courseName: course.title,
-        studentName: user.name,
-        completionDate: new Date().toLocaleDateString("pt-BR"),
-        courseHours: course.duration,
-      });
-
-      if (certificate) {
-        toast.success("Certificado gerado! 🎓", {
-          description: "Confira na página de certificados",
-        });
-      }
-    }
+    toast.success("Aula marcada como concluída!", {
+      description: `Progresso: ${newProgress}%`,
+    });
   };
 
   const handleNextLesson = () => {

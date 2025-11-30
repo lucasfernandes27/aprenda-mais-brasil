@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 import { authService } from "@/services/authService";
+import { progressService } from "@/services/progressService";
+import { certificatesService } from "@/services/certificatesService";
+import { courses } from "@/data/mockData";
 
 export interface User {
   id: string;
@@ -23,7 +26,8 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   enrollCourse: (courseId: string) => void;
-  updateProgress: (courseId: string, progress: number) => void;
+  updateProgress: (courseId: string, progress: number) => Promise<void>;
+  markLessonComplete: (courseId: string, lessonId: string) => Promise<number>;
   unlockAchievement: (achievementId: string) => void;
 }
 
@@ -138,7 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateProgress = (courseId: string, progress: number) => {
+  const updateProgress = async (courseId: string, progress: number) => {
     if (!user) return;
 
     const updatedUser = {
@@ -150,16 +154,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (progress === 100 && !user.completedCourses.includes(courseId)) {
       updatedUser.completedCourses = [...user.completedCourses, courseId];
       
+      // Gerar certificado automaticamente
+      const course = courses.find((c) => c.id === courseId);
+      if (course) {
+        const certificate = await certificatesService.createCertificate({
+          userId: user.id,
+          courseId: courseId,
+          courseName: course.title,
+          studentName: user.name,
+          completionDate: new Date().toLocaleDateString("pt-BR"),
+          courseHours: course.duration,
+        });
+
+        if (certificate) {
+          updatedUser.certificates = [...user.certificates, certificate.id];
+        }
+      }
+      
       // Desbloquear conquista "Conquistador"
       if (updatedUser.completedCourses.length === 1 && !updatedUser.unlockedAchievements.includes("3")) {
         setTimeout(() => unlockAchievement("3"), 500);
       }
 
-      // Gerar certificado (será gerenciado pelo componente que chama updateProgress)
-      toast.success("Parabéns! Você concluiu o curso! 🎉");
+      toast.success("Parabéns! Você concluiu o curso! 🎉", {
+        description: "Seu certificado foi gerado automaticamente.",
+      });
     }
 
-    updateUserData(updatedUser);
+    await updateUserData(updatedUser);
+  };
+
+  const markLessonComplete = async (courseId: string, lessonId: string): Promise<number> => {
+    if (!user) return 0;
+
+    // Marcar aula como completa no progressService
+    await progressService.markLessonComplete(user.id, courseId, lessonId);
+
+    // Calcular total de aulas do curso
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return 0;
+
+    const totalLessons = course.modules.reduce(
+      (total, module) => total + module.lessons.length,
+      0
+    );
+
+    // Calcular novo progresso
+    const newProgress = await progressService.getCourseProgress(
+      user.id,
+      courseId,
+      totalLessons
+    );
+
+    // Atualizar progresso no contexto
+    await updateProgress(courseId, newProgress);
+
+    return newProgress;
   };
 
   const unlockAchievement = (achievementId: string) => {
@@ -186,6 +236,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateUser,
     enrollCourse,
     updateProgress,
+    markLessonComplete,
     unlockAchievement,
   };
 

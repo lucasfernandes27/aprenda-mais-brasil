@@ -6,10 +6,41 @@ import { BookOpen, Trophy, Clock, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { progressService } from "@/services/progressService";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [courseProgresses, setCourseProgresses] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const loadProgresses = async () => {
+      if (!user) return;
+      
+      const progresses: Record<string, number> = {};
+      
+      for (const courseId of user.enrolledCourses) {
+        const course = courses.find((c) => c.id === courseId);
+        if (course) {
+          const totalLessons = course.modules.reduce(
+            (total, module) => total + module.lessons.length,
+            0
+          );
+          const progress = await progressService.getCourseProgress(
+            user.id,
+            courseId,
+            totalLessons
+          );
+          progresses[courseId] = progress;
+        }
+      }
+      
+      setCourseProgresses(progresses);
+    };
+
+    loadProgresses();
+  }, [user]);
 
   // Buscar cursos matriculados do usuário
   const enrolledCourses = courses
@@ -17,7 +48,7 @@ const Dashboard = () => {
     .map((course) => ({
       ...course,
       enrolled: true,
-      progress: user?.courseProgress[course.id] || 0,
+      progress: courseProgresses[course.id] ?? user?.courseProgress[course.id] ?? 0,
     }));
 
   const completedCourses = enrolledCourses.filter((c) => c.progress === 100).length;
