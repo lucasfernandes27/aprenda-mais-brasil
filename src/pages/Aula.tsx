@@ -75,18 +75,27 @@ const Aula = () => {
   const handleMarkAsComplete = async () => {
     if (!user || !courseId || !lessonId) return;
 
+    // Evitar marcar novamente se já está completa
+    if (completedLessons.has(lessonId)) {
+      toast.info("Esta aula já foi marcada como concluída");
+      return;
+    }
+
     // Marcar aula como completa e obter novo progresso
     const newProgress = await markLessonComplete(courseId, lessonId);
     
-    // Atualizar estado local
+    // Atualizar estado local imediatamente
     const newCompleted = new Set(completedLessons);
     newCompleted.add(lessonId);
     setCompletedLessons(newCompleted);
     setCurrentProgress(newProgress);
 
-    toast.success("Aula marcada como concluída!", {
-      description: `Progresso: ${newProgress}%`,
-    });
+    // Toast apenas para feedback de conclusão da aula
+    if (newProgress < 100) {
+      toast.success("Aula marcada como concluída!", {
+        description: `Progresso do curso: ${newProgress}%`,
+      });
+    }
   };
 
   const handleNextLesson = () => {

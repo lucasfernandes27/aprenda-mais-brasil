@@ -34,7 +34,7 @@ const CourseDetails = () => {
       loadReviews();
       loadProgress();
     }
-  }, [id, user]);
+  }, [id, user, user?.completedCourses, user?.courseProgress]);
 
   const loadProgress = async () => {
     if (!id || !user || !course) return;

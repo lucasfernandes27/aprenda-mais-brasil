@@ -40,7 +40,7 @@ const Dashboard = () => {
     };
 
     loadProgresses();
-  }, [user]);
+  }, [user, user?.enrolledCourses, user?.completedCourses, user?.courseProgress]);
 
   // Buscar cursos matriculados do usuário
   const enrolledCourses = courses

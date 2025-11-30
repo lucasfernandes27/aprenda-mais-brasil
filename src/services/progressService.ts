@@ -79,12 +79,17 @@ export const progressService = {
     totalLessons: number
   ): Promise<number> {
     try {
+      if (totalLessons === 0) return 0;
+      
       const progress = await this.getUserProgress(userId);
       const completedLessons = progress.filter(
         (p) => p.courseId === courseId && p.completed
       ).length;
 
-      return totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      // Usar Math.floor para evitar problemas de arredondamento
+      // e garantir que só chegue a 100% quando TODAS as aulas estiverem completas
+      const percentage = (completedLessons / totalLessons) * 100;
+      return completedLessons === totalLessons ? 100 : Math.floor(percentage);
     } catch (error) {
       console.error("Erro ao calcular progresso do curso:", error);
       return 0;
