@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { authService } from "@/services/authService";
 import { progressService } from "@/services/progressService";
 import { certificatesService } from "@/services/certificatesService";
+import { enrollmentService } from "@/services/enrollmentService";
+import { supabase } from "@/integrations/supabase/client";
 import { courses } from "@/data/mockData";
 
 export interface User {
@@ -125,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateUserData(updatedUser);
   };
 
-  const enrollCourse = (courseId: string) => {
+  const enrollCourse = async (courseId: string) => {
     if (!user) return;
 
     if (user.enrolledCourses.includes(courseId)) {
@@ -133,22 +135,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // Matricular no Supabase
+    const success = await enrollmentService.enrollCourse(user.id, courseId);
+    
+    if (!success) {
+      toast.error("Erro ao matricular no curso");
+      return;
+    }
+
+    // Atualizar estado local
     const updatedUser = {
       ...user,
       enrolledCourses: [...user.enrolledCourses, courseId],
       courseProgress: { ...user.courseProgress, [courseId]: 0 },
     };
 
-    updateUserData(updatedUser);
+    setUser(updatedUser);
 
     // Desbloquear conquista "Primeiro Passo"
     if (updatedUser.enrolledCourses.length === 1 && !updatedUser.unlockedAchievements.includes("1")) {
       unlockAchievement("1");
     }
+
+    toast.success("Matriculado com sucesso!");
   };
 
   const updateProgress = async (courseId: string, progress: number) => {
     if (!user) return;
+
+    // Atualizar no Supabase
+    const isCompleted = progress === 100;
+    await enrollmentService.updateCourseProgress(user.id, courseId, progress, isCompleted);
 
     const updatedUser = {
       ...user,
@@ -187,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    await updateUserData(updatedUser);
+    setUser(updatedUser);
   };
 
   const markLessonComplete = async (courseId: string, lessonId: string): Promise<number> => {
@@ -218,10 +235,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return newProgress;
   };
 
-  const unlockAchievement = (achievementId: string) => {
+  const unlockAchievement = async (achievementId: string) => {
     if (!user) return;
 
     if (user.unlockedAchievements.includes(achievementId)) {
+      return;
+    }
+
+    // Salvar no Supabase
+    const { error } = await supabase
+      .from("user_achievements")
+      .insert({
+        user_id: user.id,
+        achievement_id: achievementId,
+      });
+
+    if (error) {
+      console.error("Erro ao desbloquear conquista:", error);
       return;
     }
 
@@ -230,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       unlockedAchievements: [...user.unlockedAchievements, achievementId],
     };
 
-    updateUserData(updatedUser);
+    setUser(updatedUser);
     toast.success("Nova conquista desbloqueada! 🏆");
   };
 
