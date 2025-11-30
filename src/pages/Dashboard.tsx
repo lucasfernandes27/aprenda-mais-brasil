@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { courses } from "@/data/mockData";
 import ProgressBar from "@/components/ProgressBar";
-import { BookOpen, Trophy, Clock, TrendingUp } from "lucide-react";
+import { BookOpen, Trophy, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,7 +40,7 @@ const Dashboard = () => {
     };
 
     loadProgresses();
-  }, [user, user?.enrolledCourses, user?.completedCourses, user?.courseProgress]);
+  }, [user?.id, user?.enrolledCourses.length]);
 
   // Buscar cursos matriculados do usuário
   const enrolledCourses = courses
@@ -52,10 +52,6 @@ const Dashboard = () => {
     }));
 
   const completedCourses = enrolledCourses.filter((c) => c.progress === 100).length;
-  const totalHours = enrolledCourses.reduce((acc, course) => {
-    const hours = parseInt(course.duration);
-    return acc + hours;
-  }, 0);
 
   return (
     <div className="min-h-screen bg-background py-24">
@@ -71,7 +67,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -109,27 +105,6 @@ const Dashboard = () => {
                 <div className="text-2xl font-bold">{completedCourses}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Certificados conquistados
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Horas de Estudo
-                </CardTitle>
-                <Clock className="w-4 h-4 text-secondary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalHours}h</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Tempo total investido
                 </p>
               </CardContent>
             </Card>

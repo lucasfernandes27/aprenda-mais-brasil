@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
+import { NavLink } from "@/components/NavLink";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -34,11 +35,41 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center gap-6">
             {user && (
               <>
-                <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
-                <Link to="/cursos" className="text-muted-foreground hover:text-foreground transition-colors">Cursos</Link>
-                <Link to="/conquistas" className="text-muted-foreground hover:text-foreground transition-colors">Conquistas</Link>
-                <Link to="/certificados" className="text-muted-foreground hover:text-foreground transition-colors">Certificados</Link>
-                <Link to="/perfil" className="text-muted-foreground hover:text-foreground transition-colors">Perfil</Link>
+                <NavLink 
+                  to="/dashboard" 
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                  activeClassName="text-primary border-b-2 border-primary"
+                >
+                  Dashboard
+                </NavLink>
+                <NavLink 
+                  to="/cursos" 
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                  activeClassName="text-primary border-b-2 border-primary"
+                >
+                  Cursos
+                </NavLink>
+                <NavLink 
+                  to="/conquistas" 
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                  activeClassName="text-primary border-b-2 border-primary"
+                >
+                  Conquistas
+                </NavLink>
+                <NavLink 
+                  to="/certificados" 
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                  activeClassName="text-primary border-b-2 border-primary"
+                >
+                  Certificados
+                </NavLink>
+                <NavLink 
+                  to="/perfil" 
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                  activeClassName="text-primary border-b-2 border-primary"
+                >
+                  Perfil
+                </NavLink>
               </>
             )}
             
