@@ -41,6 +41,11 @@ export const useAuth = () => {
   return context;
 };
 
+// Garantir que o contexto está disponível globalmente para debug
+if (typeof window !== 'undefined') {
+  (window as any).__AUTH_CONTEXT_AVAILABLE__ = true;
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
