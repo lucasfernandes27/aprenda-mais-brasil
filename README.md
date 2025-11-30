@@ -1,73 +1,209 @@
-# Welcome to your Lovable project
+📘 Aprenda Mais Brasil — Plataforma de Desenvolvimento Profissional
 
-## Project info
+O Aprenda Mais Brasil é uma plataforma educacional voltada para apoiar professores e instituições na oferta de cursos complementares, ajudando estudantes a desenvolver novas habilidades, aprimorar competências e se preparar melhor para o mercado de trabalho.
 
-**URL**: https://lovable.dev/projects/cbcaad25-79f7-49c6-ae91-8f3fdcac41ba
+O sistema funciona como um portal interno onde:
 
-## How can I edit this code?
+Professores disponibilizam cursos organizados em módulos e aulas.
 
-There are several ways of editing your application.
+Alunos podem se matricular, acompanhar o próprio progresso e obter certificados de conclusão.
 
-**Use Lovable**
+O aprendizado é acompanhado de forma estruturada, com histórico, conquistas e avaliações.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cbcaad25-79f7-49c6-ae91-8f3fdcac41ba) and start prompting.
+🚀 Como rodar o projeto
 
-Changes made via Lovable will be committed automatically to this repo.
+Antes de começar, certifique-se de ter o Node.js (versão 18 ou superior) instalado.
 
-**Use your preferred IDE**
+📥 Instalar dependências
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Na pasta do projeto, execute:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+▶️ Executar a aplicação
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+A aplicação iniciará usando Vite (geralmente em http://localhost:5173).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+🎯 Objetivo Educacional da Plataforma
 
-**Use GitHub Codespaces**
+A plataforma foi criada para:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Ajudar professores a oferecerem conteúdos complementares.
 
-## What technologies are used for this project?
+Permitir que alunos desenvolvam habilidades práticas valorizadas pelo mercado.
 
-This project is built with:
+Criar um ambiente único para aprendizado autônomo e guiado.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Facilitar o acompanhamento real do progresso de cada estudante.
 
-## How can I deploy this project?
+Fornecer certificados oficiais de cursos concluídos.
 
-Simply open [Lovable](https://lovable.dev/projects/cbcaad25-79f7-49c6-ae91-8f3fdcac41ba) and click on Share -> Publish.
+Algumas trilhas comuns incluem:
 
-## Can I connect a custom domain to my Lovable project?
+Excel, Word e PowerPoint
 
-Yes, you can!
+Produtividade e organização
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Noções digitais
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Comunicação e carreira
+
+Ferramentas práticas de trabalho
+
+🧩 Principais funcionalidades
+🔐 Autenticação (Supabase)
+
+Login e cadastro seguro via Supabase Auth.
+
+Somente usuários autenticados podem acessar o ambiente interno.
+
+Sessões persistentes.
+
+🧑‍🏫 Área dos Cursos
+
+Professores podem disponibilizar cursos organizados em:
+
+Módulos
+
+Aulas com vídeo (YouTube)
+
+Conteúdos práticos voltados a preparação profissional
+
+Os alunos visualizam:
+
+Descrição completa do curso
+
+Nível
+
+Categoria
+
+Carga horária
+
+📚 Matrícula e Acompanhamento
+
+Alunos podem se matricular em qualquer curso disponível.
+
+Matrículas são armazenadas no Supabase (tabela enrollments).
+
+A Dashboard exibe todos os cursos em andamento.
+
+▶️ Aprendizado com Progresso Real
+
+Cada aula assistida fica registrada no banco (lesson_progress).
+
+O progresso é calculado automaticamente com base nas aulas concluídas.
+
+Progresso aparece:
+
+Na Dashboard
+
+Na página do curso
+
+Em cada módulo
+
+🎓 Certificados Automáticos
+
+Ao concluir 100% do curso:
+
+Um certificado é gerado automaticamente.
+
+O certificado inclui:
+
+Nome do aluno
+
+Nome do curso
+
+Carga horária
+
+Data de conclusão
+
+Código único
+
+Perfeito para enriquecer o currículo do aluno.
+
+⭐ Avaliação dos Cursos
+
+Os estudantes podem avaliar os cursos que concluíram.
+
+Avaliação com notas de 1 a 5 estrelas + comentário opcional.
+
+Professores podem acompanhar o engajamento dos alunos.
+
+🏆 Conquistas
+
+O aluno desbloqueia conquistas conforme avança:
+
+Primeira matrícula
+
+Primeiro curso concluído
+
+Série de aulas assistidas
+
+Entre outras futuras expansões
+
+Ideal para incentivar o aprendizado contínuo.
+
+👤 Perfil do Aluno
+
+Edição completa do perfil:
+
+Nome
+
+Bio
+
+Área profissional
+
+Foto (upload de arquivo real via Supabase Storage)
+
+Informações sincronizadas em:
+
+Navbar
+
+Dashboard
+
+Certificados
+
+🌓 Tema Claro / Escuro
+
+Alternância entre modo claro e escuro.
+
+Preferência salva localmente.
+
+🗄️ Integração Total com Supabase
+
+O app utiliza o Supabase para:
+
+Funcionalidade Tabela
+Perfil do usuário profiles
+Cursos courses
+Módulos course_modules
+Aulas lessons
+Matrículas enrollments
+Progresso real lesson_progress
+Certificados certificates
+Avaliação dos cursos course_reviews
+Avatar (foto) Supabase Storage
+
+Toda a segurança é gerenciada por RLS (Row-Level Security) configurada.
+
+🛠️ Tecnologias utilizadas
+
+React + TypeScript
+
+Vite
+
+Supabase (Auth, Database, Storage)
+
+TailwindCSS / Shadcn (dependendo da versão)
+
+Lucide React
+
+Context API / Zustand
+
+Vite Dev Server
+
+📬 Contribuição
+
+Sugestões, melhorias e correções são bem-vindas!
+Abra uma issue ou envie um pull request no repositório.
