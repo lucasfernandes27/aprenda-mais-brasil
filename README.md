@@ -1,209 +1,197 @@
-📘 Aprenda Mais Brasil — Plataforma de Desenvolvimento Profissional
+# 📘 Aprenda Mais Brasil — Plataforma de Desenvolvimento Profissional
 
-O Aprenda Mais Brasil é uma plataforma educacional voltada para apoiar professores e instituições na oferta de cursos complementares, ajudando estudantes a desenvolver novas habilidades, aprimorar competências e se preparar melhor para o mercado de trabalho.
+O **Aprenda Mais Brasil** é uma plataforma educacional voltada para apoiar professores e instituições na oferta de cursos complementares, ajudando estudantes a desenvolver novas habilidades, aprimorar competências e se preparar melhor para o mercado de trabalho.
+
+## 🧠 Como funciona
 
 O sistema funciona como um portal interno onde:
 
-Professores disponibilizam cursos organizados em módulos e aulas.
+- Professores disponibilizam cursos organizados em módulos e aulas.
+- Alunos podem se matricular, acompanhar o próprio progresso e obter certificados de conclusão.
+- O aprendizado é acompanhado de forma estruturada, com histórico, conquistas e avaliações.
 
-Alunos podem se matricular, acompanhar o próprio progresso e obter certificados de conclusão.
+---
 
-O aprendizado é acompanhado de forma estruturada, com histórico, conquistas e avaliações.
+# 🚀 Como rodar o projeto
 
-🚀 Como rodar o projeto
+Antes de começar, certifique-se de ter o **Node.js (versão 18 ou superior)** instalado.
 
-Antes de começar, certifique-se de ter o Node.js (versão 18 ou superior) instalado.
-
-📥 Instalar dependências
+## 📥 Instalar dependências
 
 Na pasta do projeto, execute:
 
+```bash
 npm install
+```
 
-▶️ Executar a aplicação
+## ▶️ Executar a aplicação
+
+```bash
 npm run dev
+```
 
-A aplicação iniciará usando Vite (geralmente em http://localhost:5173).
+A aplicação iniciará usando **Vite** (geralmente em `http://localhost:5173`).
 
-🎯 Objetivo Educacional da Plataforma
+---
+
+# 🎯 Objetivo Educacional da Plataforma
 
 A plataforma foi criada para:
 
-Ajudar professores a oferecerem conteúdos complementares.
+- Ajudar professores a oferecerem conteúdos complementares.
+- Permitir que alunos desenvolvam habilidades práticas valorizadas pelo mercado.
+- Criar um ambiente único para aprendizado autônomo e guiado.
+- Facilitar o acompanhamento real do progresso de cada estudante.
+- Fornecer certificados oficiais de cursos concluídos.
 
-Permitir que alunos desenvolvam habilidades práticas valorizadas pelo mercado.
+### 📚 Trilhas comuns incluem:
 
-Criar um ambiente único para aprendizado autônomo e guiado.
+- Excel, Word e PowerPoint
+- Produtividade e organização
+- Noções digitais
+- Comunicação e carreira
+- Ferramentas práticas de trabalho
 
-Facilitar o acompanhamento real do progresso de cada estudante.
+---
 
-Fornecer certificados oficiais de cursos concluídos.
+# 🧩 Principais funcionalidades
 
-Algumas trilhas comuns incluem:
+## 🔐 Autenticação (Supabase)
 
-Excel, Word e PowerPoint
+- Login e cadastro seguro via **Supabase Auth**.
+- Somente usuários autenticados podem acessar o ambiente interno.
+- Sessões persistentes.
 
-Produtividade e organização
+---
 
-Noções digitais
-
-Comunicação e carreira
-
-Ferramentas práticas de trabalho
-
-🧩 Principais funcionalidades
-🔐 Autenticação (Supabase)
-
-Login e cadastro seguro via Supabase Auth.
-
-Somente usuários autenticados podem acessar o ambiente interno.
-
-Sessões persistentes.
-
-🧑‍🏫 Área dos Cursos
+## 🧑‍🏫 Área dos Cursos
 
 Professores podem disponibilizar cursos organizados em:
 
-Módulos
-
-Aulas com vídeo (YouTube)
-
-Conteúdos práticos voltados a preparação profissional
+- Módulos
+- Aulas com vídeo (YouTube)
+- Conteúdos práticos voltados à preparação profissional
 
 Os alunos visualizam:
 
-Descrição completa do curso
+- Descrição completa do curso
+- Nível
+- Categoria
+- Carga horária
 
-Nível
+---
 
-Categoria
+## 📚 Matrícula e Acompanhamento
 
-Carga horária
+- Alunos podem se matricular em qualquer curso disponível.
+- Matrículas são armazenadas no Supabase (`enrollments`).
+- A **Dashboard** exibe todos os cursos em andamento.
 
-📚 Matrícula e Acompanhamento
+---
 
-Alunos podem se matricular em qualquer curso disponível.
+## ▶️ Aprendizado com Progresso Real
 
-Matrículas são armazenadas no Supabase (tabela enrollments).
+Cada aula assistida é registrada no banco (`lesson_progress`).
 
-A Dashboard exibe todos os cursos em andamento.
+O progresso aparece:
 
-▶️ Aprendizado com Progresso Real
+- Na Dashboard
+- Na página do curso
+- Em cada módulo
 
-Cada aula assistida fica registrada no banco (lesson_progress).
+---
 
-O progresso é calculado automaticamente com base nas aulas concluídas.
+## 🎓 Certificados Automáticos
 
-Progresso aparece:
-
-Na Dashboard
-
-Na página do curso
-
-Em cada módulo
-
-🎓 Certificados Automáticos
-
-Ao concluir 100% do curso:
-
-Um certificado é gerado automaticamente.
+Ao concluir 100% do curso, um **certificado é gerado automaticamente**.
 
 O certificado inclui:
 
-Nome do aluno
+- Nome do aluno
+- Nome do curso
+- Carga horária
+- Data de conclusão
+- Código único
 
-Nome do curso
+---
 
-Carga horária
+## ⭐ Avaliação dos Cursos
 
-Data de conclusão
+- Estudantes podem avaliar cursos concluídos com notas de **1 a 5 estrelas** + comentário.
+- Professores acompanham engajamento e feedback.
 
-Código único
+---
 
-Perfeito para enriquecer o currículo do aluno.
-
-⭐ Avaliação dos Cursos
-
-Os estudantes podem avaliar os cursos que concluíram.
-
-Avaliação com notas de 1 a 5 estrelas + comentário opcional.
-
-Professores podem acompanhar o engajamento dos alunos.
-
-🏆 Conquistas
+## 🏆 Conquistas
 
 O aluno desbloqueia conquistas conforme avança:
 
-Primeira matrícula
+- Primeira matrícula
+- Primeiro curso concluído
+- Série de aulas assistidas
+- Entre outras expansões
 
-Primeiro curso concluído
+---
 
-Série de aulas assistidas
+## 👤 Perfil do Aluno
 
-Entre outras futuras expansões
+Edição completa do perfil com:
 
-Ideal para incentivar o aprendizado contínuo.
-
-👤 Perfil do Aluno
-
-Edição completa do perfil:
-
-Nome
-
-Bio
-
-Área profissional
-
-Foto (upload de arquivo real via Supabase Storage)
+- Nome
+- Bio
+- Área profissional
+- Foto (upload real via Supabase Storage)
 
 Informações sincronizadas em:
 
-Navbar
+- Navbar
+- Dashboard
+- Certificados
 
-Dashboard
+---
 
-Certificados
+## 🌓 Tema Claro / Escuro
 
-🌓 Tema Claro / Escuro
+- Alternância entre tema claro e escuro.
+- Preferência salva localmente.
 
-Alternância entre modo claro e escuro.
+---
 
-Preferência salva localmente.
-
-🗄️ Integração Total com Supabase
+# 🗄️ Integração Total com Supabase
 
 O app utiliza o Supabase para:
 
-Funcionalidade Tabela
-Perfil do usuário profiles
-Cursos courses
-Módulos course_modules
-Aulas lessons
-Matrículas enrollments
-Progresso real lesson_progress
-Certificados certificates
-Avaliação dos cursos course_reviews
-Avatar (foto) Supabase Storage
+| Funcionalidade    | Tabela/Serviço    |
+| ----------------- | ----------------- |
+| Perfil do usuário | `profiles`        |
+| Cursos            | `courses`         |
+| Módulos           | `course_modules`  |
+| Aulas             | `lessons`         |
+| Matrículas        | `enrollments`     |
+| Progresso         | `lesson_progress` |
+| Certificados      | `certificates`    |
+| Avaliações        | `course_reviews`  |
+| Avatar (foto)     | Storage           |
 
-Toda a segurança é gerenciada por RLS (Row-Level Security) configurada.
+Toda a segurança é gerenciada por **RLS (Row-Level Security)**.
 
-🛠️ Tecnologias utilizadas
+---
 
-React + TypeScript
+# 🛠️ Tecnologias utilizadas
 
-Vite
+- **React + TypeScript**
+- **Vite**
+- **Supabase (Auth, Database, Storage)**
+- **TailwindCSS / Shadcn UI**
+- **Lucide React**
+- **Context API / Zustand**
+- **Vite Dev Server**
 
-Supabase (Auth, Database, Storage)
+---
 
-TailwindCSS / Shadcn (dependendo da versão)
-
-Lucide React
-
-Context API / Zustand
-
-Vite Dev Server
-
-📬 Contribuição
+# 📬 Contribuição
 
 Sugestões, melhorias e correções são bem-vindas!
-Abra uma issue ou envie um pull request no repositório.
+Abra uma _issue_ ou envie um **pull request** no repositório.
+
+---
