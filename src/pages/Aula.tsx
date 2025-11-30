@@ -6,6 +6,8 @@ import { ArrowLeft, ArrowRight, CheckCircle2, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { certificatesService } from "@/services/certificatesService";
+import { toast } from "sonner";
 
 const Aula = () => {
   const { courseId, moduleId, lessonId } = useParams();
@@ -58,7 +60,7 @@ const Aula = () => {
   const nextLesson = allLessons[currentLessonIndex + 1];
   const prevLesson = allLessons[currentLessonIndex - 1];
 
-  const handleMarkAsComplete = () => {
+  const handleMarkAsComplete = async () => {
     const newCompleted = new Set(completedLessons);
     newCompleted.add(lessonId!);
     setCompletedLessons(newCompleted);
@@ -69,6 +71,24 @@ const Aula = () => {
     // Calcular progresso
     const progress = Math.round((newCompleted.size / allLessons.length) * 100);
     updateProgress(courseId!, progress);
+
+    // Se concluiu 100%, gerar certificado
+    if (progress === 100 && user) {
+      const certificate = await certificatesService.createCertificate({
+        userId: user.id,
+        courseId: courseId!,
+        courseName: course.title,
+        studentName: user.name,
+        completionDate: new Date().toLocaleDateString("pt-BR"),
+        courseHours: course.duration,
+      });
+
+      if (certificate) {
+        toast.success("Certificado gerado! 🎓", {
+          description: "Confira na página de certificados",
+        });
+      }
+    }
   };
 
   const handleNextLesson = () => {

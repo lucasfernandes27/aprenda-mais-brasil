@@ -12,6 +12,7 @@ export interface User {
   completedCourses: string[];
   courseProgress: Record<string, number>;
   unlockedAchievements: string[];
+  certificates: string[]; // IDs dos certificados
   memberSince: string;
 }
 
@@ -153,6 +154,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (updatedUser.completedCourses.length === 1 && !updatedUser.unlockedAchievements.includes("3")) {
         setTimeout(() => unlockAchievement("3"), 500);
       }
+
+      // Gerar certificado (será gerenciado pelo componente que chama updateProgress)
+      toast.success("Parabéns! Você concluiu o curso! 🎉");
     }
 
     updateUserData(updatedUser);

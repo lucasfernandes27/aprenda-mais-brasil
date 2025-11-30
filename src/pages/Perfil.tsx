@@ -1,16 +1,25 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Trophy, Mail, Calendar } from "lucide-react";
+import { BookOpen, Trophy, Mail, Calendar, Edit } from "lucide-react";
 import { motion } from "framer-motion";
 import { courses, achievements } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
+import EditProfileDialog from "@/components/EditProfileDialog";
+import { toast } from "sonner";
 
 const Perfil = () => {
-  const { user: authUser } = useAuth();
+  const { user: authUser, updateUser } = useAuth();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   if (!authUser) return null;
+
+  const handleSaveProfile = (updates: Partial<typeof authUser>) => {
+    updateUser(updates);
+    toast.success("Perfil atualizado com sucesso!");
+  };
 
   const enrolledCoursesCount = authUser.enrolledCourses.length;
   const completedCoursesCount = authUser.completedCourses.length;
@@ -45,22 +54,36 @@ const Perfil = () => {
             <Card>
               <CardHeader className="text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
-                    {initials}
-                  </AvatarFallback>
+                  {authUser.avatar ? (
+                    <img src={authUser.avatar} alt={authUser.name} className="object-cover" />
+                  ) : (
+                    <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
+                      {initials}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <CardTitle className="text-2xl">{authUser.name}</CardTitle>
                 <CardDescription className="flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4" />
                   {authUser.email}
                 </CardDescription>
+                {authUser.bio && (
+                  <p className="text-sm text-muted-foreground mt-4 text-center">
+                    {authUser.bio}
+                  </p>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span>Membro desde {authUser.memberSince}</span>
                 </div>
-                <Button className="w-full" variant="outline">
+                <Button 
+                  className="w-full" 
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
                   Editar perfil
                 </Button>
               </CardContent>
@@ -186,6 +209,13 @@ const Perfil = () => {
             </Card>
           </motion.div>
         </div>
+
+        <EditProfileDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          user={authUser}
+          onSave={handleSaveProfile}
+        />
       </div>
     </div>
   );

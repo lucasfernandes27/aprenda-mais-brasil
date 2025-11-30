@@ -11,6 +11,7 @@ interface User {
   completedCourses: string[];
   courseProgress: Record<string, number>;
   unlockedAchievements: string[];
+  certificates: string[];
   memberSince: string;
 }
 
@@ -46,6 +47,7 @@ export const authService = {
         completedCourses: storedUser.completedCourses || [],
         courseProgress: storedUser.courseProgress || {},
         unlockedAchievements: storedUser.unlockedAchievements || [],
+        certificates: storedUser.certificates || [],
         memberSince: storedUser.memberSince,
       };
 
@@ -82,6 +84,7 @@ export const authService = {
         completedCourses: [],
         courseProgress: {},
         unlockedAchievements: [],
+        certificates: [],
         memberSince: new Date().toLocaleDateString("pt-BR", {
           month: "long",
           year: "numeric",
@@ -101,6 +104,7 @@ export const authService = {
         completedCourses: [],
         courseProgress: {},
         unlockedAchievements: [],
+        certificates: [],
         memberSince: newUser.memberSince,
       };
 
@@ -142,6 +146,7 @@ export const authService = {
           completedCourses: user.completedCourses,
           courseProgress: user.courseProgress,
           unlockedAchievements: user.unlockedAchievements,
+          certificates: user.certificates,
         };
         localStorage.setItem("users", JSON.stringify(users));
       }
