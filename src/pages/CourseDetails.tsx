@@ -4,16 +4,70 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Clock, BarChart, CheckCircle2, ArrowLeft, PlayCircle } from "lucide-react";
+import { Clock, BarChart, CheckCircle2, ArrowLeft, PlayCircle, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { reviewsService, Review } from "@/services/reviewsService";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import ReviewForm from "@/components/ReviewForm";
+import ReviewList from "@/components/ReviewList";
+import StarRating from "@/components/StarRating";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, enrollCourse } = useAuth();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<Review | null>(null);
+  const [averageRating, setAverageRating] = useState({ average: 0, count: 0 });
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   const course = courses.find((c) => c.id === id);
+
+  useEffect(() => {
+    if (id) {
+      loadReviews();
+    }
+  }, [id]);
+
+  const loadReviews = async () => {
+    if (!id) return;
+    
+    const courseReviews = await reviewsService.getCourseReviews(id);
+    setReviews(courseReviews);
+
+    const rating = await reviewsService.getCourseAverageRating(id);
+    setAverageRating(rating);
+
+    if (user) {
+      const review = await reviewsService.getUserReview(id, user.id);
+      setUserReview(review);
+    }
+  };
+
+  const handleSubmitReview = async (rating: number, comment: string) => {
+    if (!user || !id) return;
+
+    if (userReview) {
+      // Atualizar avaliação existente
+      await reviewsService.updateReview(userReview.id, rating, comment);
+      toast.success("Avaliação atualizada!");
+    } else {
+      // Criar nova avaliação
+      await reviewsService.createReview({
+        courseId: id,
+        userId: user.id,
+        userName: user.name,
+        rating,
+        comment,
+      });
+      toast.success("Avaliação enviada!");
+    }
+
+    setShowReviewForm(false);
+    loadReviews();
+  };
 
   if (!course) {
     return (
@@ -132,6 +186,89 @@ const CourseDetails = () => {
                 </Accordion>
               </CardContent>
             </Card>
+
+            {/* Reviews Section */}
+            {isEnrolled && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-8"
+              >
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Avaliações</CardTitle>
+                        <CardDescription>
+                          O que os alunos acharam deste curso
+                        </CardDescription>
+                      </div>
+                      {averageRating.count > 0 && (
+                        <div className="text-center">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-3xl font-bold">{averageRating.average}</span>
+                            <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {averageRating.count} {averageRating.count === 1 ? "avaliação" : "avaliações"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {!showReviewForm && !userReview && (
+                      <Button onClick={() => setShowReviewForm(true)} className="w-full">
+                        Avaliar este curso
+                      </Button>
+                    )}
+
+                    {!showReviewForm && userReview && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">Sua avaliação</h4>
+                          <Button variant="outline" size="sm" onClick={() => setShowReviewForm(true)}>
+                            Editar
+                          </Button>
+                        </div>
+                        <div className="p-4 rounded-lg bg-muted/50">
+                          <StarRating rating={userReview.rating} readonly />
+                          {userReview.comment && (
+                            <p className="text-sm mt-2">{userReview.comment}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {showReviewForm && (
+                      <div className="space-y-3">
+                        <ReviewForm
+                          onSubmit={handleSubmitReview}
+                          initialRating={userReview?.rating || 0}
+                          initialComment={userReview?.comment || ""}
+                          isEditing={!!userReview}
+                        />
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowReviewForm(false)}
+                          className="w-full"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    )}
+
+                    {reviews.length > 0 && (
+                      <div className="pt-6 border-t">
+                        <h4 className="font-medium mb-4">Todas as avaliações</h4>
+                        <ReviewList reviews={reviews} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Sidebar */}

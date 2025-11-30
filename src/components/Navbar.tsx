@@ -1,4 +1,4 @@
-import { BookOpen, LogOut, Moon, Sun } from "lucide-react";
+import { BookOpen, LogOut, Moon, Sun, Award } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "next-themes";
@@ -37,6 +37,7 @@ const Navbar = () => {
                 <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
                 <Link to="/cursos" className="text-muted-foreground hover:text-foreground transition-colors">Cursos</Link>
                 <Link to="/conquistas" className="text-muted-foreground hover:text-foreground transition-colors">Conquistas</Link>
+                <Link to="/certificados" className="text-muted-foreground hover:text-foreground transition-colors">Certificados</Link>
                 <Link to="/perfil" className="text-muted-foreground hover:text-foreground transition-colors">Perfil</Link>
               </>
             )}
