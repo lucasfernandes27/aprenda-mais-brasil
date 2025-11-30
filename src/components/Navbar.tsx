@@ -1,15 +1,21 @@
-import { BookOpen, LogOut } from "lucide-react";
+import { BookOpen, LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login");
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -25,35 +31,40 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Início</Link>
+          <nav className="hidden md:flex items-center gap-6">
             {user && (
               <>
-                <Link to="/cursos" className="text-muted-foreground hover:text-foreground transition-colors">Cursos</Link>
                 <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+                <Link to="/cursos" className="text-muted-foreground hover:text-foreground transition-colors">Cursos</Link>
                 <Link to="/conquistas" className="text-muted-foreground hover:text-foreground transition-colors">Conquistas</Link>
                 <Link to="/perfil" className="text-muted-foreground hover:text-foreground transition-colors">Perfil</Link>
               </>
             )}
-            {user ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="ml-4"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate("/login")}
-                className="ml-4"
-              >
-                Entrar
-              </Button>
+            
+            {user && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  className="ml-2"
+                  aria-label="Alternar tema"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="w-5 h-5" />
+                  ) : (
+                    <Moon className="w-5 h-5" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </Button>
+              </>
             )}
           </nav>
         </div>
