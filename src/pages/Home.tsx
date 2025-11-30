@@ -6,12 +6,14 @@ import { courses } from "@/data/mockData";
 import { Search, Sparkles, BookOpen, Users, Trophy } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import heroImage from "@/assets/hero-learning.jpg";
 
 const Home = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const navigate = useNavigate();
 
   const categories = ["Todos", "Pacote Office", "Produtividade", "Tecnologia"];
 
@@ -46,9 +48,9 @@ const Home = () => {
               <Button
                 size="lg"
                 className="text-lg px-8"
-                onClick={() => document.getElementById('cursos')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => navigate(user ? "/cursos" : "/login")}
               >
-                Explorar cursos
+                {user ? "Explorar cursos" : "Começar agora"}
                 <Sparkles className="ml-2 w-5 h-5" />
               </Button>
             </motion.div>

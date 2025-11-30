@@ -5,15 +5,38 @@ import { Label } from "@/components/ui/label";
 import { BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 
 const Cadastro = () => {
   const navigate = useNavigate();
+  const { signup, user } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Se já estiver logado, redirecionar para dashboard
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Conta criada com sucesso!");
-    navigate("/dashboard");
+    
+    if (!name || !email || !password) {
+      return;
+    }
+
+    setIsLoading(true);
+    const success = await signup(name, email, password);
+    setIsLoading(false);
+
+    if (success) {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -53,6 +76,8 @@ const Cadastro = () => {
                   id="name"
                   type="text"
                   placeholder="Seu nome"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                 />
               </div>
@@ -62,6 +87,8 @@ const Cadastro = () => {
                   id="email"
                   type="email"
                   placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -71,11 +98,13 @@ const Cadastro = () => {
                   id="password"
                   type="password"
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Criar conta
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Criando conta..." : "Criar conta"}
               </Button>
             </form>
 

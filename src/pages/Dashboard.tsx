@@ -5,16 +5,20 @@ import ProgressBar from "@/components/ProgressBar";
 import { BookOpen, Trophy, Clock, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // Mock enrolled courses with progress
-  const enrolledCourses = courses.slice(0, 3).map((course, index) => ({
-    ...course,
-    enrolled: true,
-    progress: [30, 65, 100][index],
-  }));
+  // Buscar cursos matriculados do usuário
+  const enrolledCourses = courses
+    .filter((course) => user?.enrolledCourses.includes(course.id))
+    .map((course) => ({
+      ...course,
+      enrolled: true,
+      progress: user?.courseProgress[course.id] || 0,
+    }));
 
   const completedCourses = enrolledCourses.filter((c) => c.progress === 100).length;
   const totalHours = enrolledCourses.reduce((acc, course) => {
@@ -29,7 +33,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-4xl font-bold mb-2">Seu painel de aprendizado</h1>
+          <h1 className="text-4xl font-bold mb-2">Olá, {user?.name}! 👋</h1>
           <p className="text-lg text-muted-foreground mb-8">
             Acompanhe seu progresso e continue evoluindo.
           </p>
