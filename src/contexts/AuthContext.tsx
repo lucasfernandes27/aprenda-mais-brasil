@@ -1,10 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
+import { authService } from "@/services/authService";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
+  bio?: string;
   enrolledCourses: string[];
   completedCourses: string[];
   courseProgress: Record<string, number>;
@@ -17,6 +20,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
   enrollCourse: (courseId: string) => void;
   updateProgress: (courseId: string, progress: number) => void;
   unlockAchievement: (achievementId: string) => void;
@@ -36,57 +40,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Carregar usuário do localStorage
-    const storedUser = localStorage.getItem("currentUser");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // Carregar usuário usando o serviço
+    authService.getCurrentUser().then((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      }
+    });
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      // Buscar usuários do localStorage
-      const usersData = localStorage.getItem("users");
-      const users = usersData ? JSON.parse(usersData) : {};
+    const { user: userData, error } = await authService.login(email, password);
 
-      const userKey = email.toLowerCase();
-      const storedUser = users[userKey];
-
-      if (!storedUser) {
-        toast.error("Usuário não encontrado", {
-          description: "Verifique seu e-mail ou crie uma conta.",
-        });
-        return false;
-      }
-
-      if (storedUser.password !== password) {
-        toast.error("Senha incorreta", {
-          description: "Por favor, tente novamente.",
-        });
-        return false;
-      }
-
-      const userData: User = {
-        id: storedUser.id,
-        name: storedUser.name,
-        email: storedUser.email,
-        enrolledCourses: storedUser.enrolledCourses || [],
-        completedCourses: storedUser.completedCourses || [],
-        courseProgress: storedUser.courseProgress || {},
-        unlockedAchievements: storedUser.unlockedAchievements || [],
-        memberSince: storedUser.memberSince,
-      };
-
-      setUser(userData);
-      localStorage.setItem("currentUser", JSON.stringify(userData));
-      toast.success("Login realizado com sucesso!");
-      return true;
-    } catch (error) {
+    if (error) {
       toast.error("Erro ao fazer login", {
-        description: "Por favor, tente novamente.",
+        description: error,
       });
       return false;
     }
+
+    if (userData) {
+      setUser(userData);
+      toast.success("Login realizado com sucesso!");
+      return true;
+    }
+
+    return false;
   };
 
   const signup = async (
@@ -94,86 +72,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string
   ): Promise<boolean> => {
-    try {
-      // Buscar usuários do localStorage
-      const usersData = localStorage.getItem("users");
-      const users = usersData ? JSON.parse(usersData) : {};
+    const { user: userData, error } = await authService.signup(name, email, password);
 
-      const userKey = email.toLowerCase();
-
-      if (users[userKey]) {
-        toast.error("E-mail já cadastrado", {
-          description: "Use outro e-mail ou faça login.",
-        });
-        return false;
-      }
-
-      const newUser = {
-        id: Date.now().toString(),
-        name,
-        email,
-        password,
-        enrolledCourses: [],
-        completedCourses: [],
-        courseProgress: {},
-        unlockedAchievements: [],
-        memberSince: new Date().toLocaleDateString("pt-BR", {
-          month: "long",
-          year: "numeric",
-        }),
-      };
-
-      users[userKey] = newUser;
-      localStorage.setItem("users", JSON.stringify(users));
-
-      const userData: User = {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        enrolledCourses: [],
-        completedCourses: [],
-        courseProgress: {},
-        unlockedAchievements: [],
-        memberSince: newUser.memberSince,
-      };
-
-      setUser(userData);
-      localStorage.setItem("currentUser", JSON.stringify(userData));
-      toast.success("Conta criada com sucesso!");
-      return true;
-    } catch (error) {
+    if (error) {
       toast.error("Erro ao criar conta", {
-        description: "Por favor, tente novamente.",
+        description: error,
       });
       return false;
     }
+
+    if (userData) {
+      setUser(userData);
+      toast.success("Conta criada com sucesso!");
+      return true;
+    }
+
+    return false;
   };
 
   const logout = () => {
+    authService.logout();
     setUser(null);
-    localStorage.removeItem("currentUser");
     toast.success("Logout realizado com sucesso!");
   };
 
-  const updateUserData = (updatedUser: User) => {
-    setUser(updatedUser);
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-
-    // Atualizar também no registro de usuários
-    const usersData = localStorage.getItem("users");
-    const users = usersData ? JSON.parse(usersData) : {};
-    const userKey = updatedUser.email.toLowerCase();
+  const updateUserData = async (updatedUser: User) => {
+    const { user: savedUser, error } = await authService.updateUser(updatedUser);
     
-    if (users[userKey]) {
-      users[userKey] = {
-        ...users[userKey],
-        enrolledCourses: updatedUser.enrolledCourses,
-        completedCourses: updatedUser.completedCourses,
-        courseProgress: updatedUser.courseProgress,
-        unlockedAchievements: updatedUser.unlockedAchievements,
-      };
-      localStorage.setItem("users", JSON.stringify(users));
+    if (savedUser && !error) {
+      setUser(savedUser);
     }
+  };
+
+  const updateUser = (updates: Partial<User>) => {
+    if (!user) return;
+
+    const updatedUser = {
+      ...user,
+      ...updates,
+    };
+
+    updateUserData(updatedUser);
   };
 
   const enrollCourse = (courseId: string) => {
@@ -240,6 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     logout,
+    updateUser,
     enrollCourse,
     updateProgress,
     unlockAchievement,
