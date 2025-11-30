@@ -21,34 +21,36 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/cadastro" element={<Cadastro />} />
-              <Route path="/cursos" element={<ProtectedRoute><Cursos /></ProtectedRoute>} />
-              <Route path="/curso/:id" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
-              <Route path="/curso/:courseId/modulo/:moduleId/aula/:lessonId" element={<ProtectedRoute><Aula /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/conquistas" element={<ProtectedRoute><Conquistas /></ProtectedRoute>} />
-              <Route path="/certificados" element={<ProtectedRoute><Certificados /></ProtectedRoute>} />
-              <Route path="/certificado/:id" element={<ProtectedRoute><VerCertificado /></ProtectedRoute>} />
-              <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/cadastro" element={<Cadastro />} />
+                <Route path="/cursos" element={<ProtectedRoute><Cursos /></ProtectedRoute>} />
+                <Route path="/curso/:id" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
+                <Route path="/curso/:courseId/modulo/:moduleId/aula/:lessonId" element={<ProtectedRoute><Aula /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/conquistas" element={<ProtectedRoute><Conquistas /></ProtectedRoute>} />
+                <Route path="/certificados" element={<ProtectedRoute><Certificados /></ProtectedRoute>} />
+                <Route path="/certificado/:id" element={<ProtectedRoute><VerCertificado /></ProtectedRoute>} />
+                <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
