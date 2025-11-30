@@ -5,17 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Trophy, Mail, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { courses, achievements } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Perfil = () => {
-  // Mock user data
-  const user = {
-    name: "Maria Silva",
-    email: "maria.silva@email.com",
-    memberSince: "Janeiro 2024",
-    enrolledCourses: 3,
-    completedCourses: 1,
-    unlockedAchievements: 2,
-  };
+  const { user: authUser } = useAuth();
+
+  if (!authUser) return null;
+
+  const enrolledCoursesCount = authUser.enrolledCourses.length;
+  const completedCoursesCount = authUser.completedCourses.length;
+  const unlockedAchievementsCount = authUser.unlockedAchievements.length;
+
+  // Pegar iniciais do nome
+  const initials = authUser.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <div className="min-h-screen bg-background py-24">
@@ -39,19 +46,19 @@ const Perfil = () => {
               <CardHeader className="text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
                   <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
-                    MS
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-2xl">{user.name}</CardTitle>
+                <CardTitle className="text-2xl">{authUser.name}</CardTitle>
                 <CardDescription className="flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4" />
-                  {user.email}
+                  {authUser.email}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span>Membro desde {user.memberSince}</span>
+                  <span>Membro desde {authUser.memberSince}</span>
                 </div>
                 <Button className="w-full" variant="outline">
                   Editar perfil
@@ -79,7 +86,7 @@ const Perfil = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">{user.enrolledCourses}</div>
+                  <div className="text-3xl font-bold">{enrolledCoursesCount}</div>
                 </CardContent>
               </Card>
 
@@ -93,7 +100,7 @@ const Perfil = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">{user.completedCourses}</div>
+                  <div className="text-3xl font-bold">{completedCoursesCount}</div>
                 </CardContent>
               </Card>
 
@@ -108,7 +115,7 @@ const Perfil = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
-                    {user.unlockedAchievements}/{achievements.length}
+                    {unlockedAchievementsCount}/{achievements.length}
                   </div>
                 </CardContent>
               </Card>

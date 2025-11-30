@@ -3,15 +3,15 @@ import { courses } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, BarChart, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Clock, BarChart, CheckCircle2, ArrowLeft, PlayCircle } from "lucide-react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
-import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [enrolled, setEnrolled] = useState(false);
+  const { user, enrollCourse } = useAuth();
 
   const course = courses.find((c) => c.id === id);
 
@@ -32,11 +32,13 @@ const CourseDetails = () => {
     Avançado: "bg-destructive text-destructive-foreground",
   };
 
+  const isEnrolled = user?.enrolledCourses.includes(id!);
+
   const handleEnroll = () => {
-    setEnrolled(true);
-    toast.success("Matrícula realizada com sucesso!", {
-      description: "Você já pode começar seus estudos.",
-    });
+    if (id) {
+      enrollCourse(id);
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -85,24 +87,49 @@ const CourseDetails = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
+                <Accordion type="single" collapsible className="w-full">
                   {course.modules.map((module, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-medium text-primary">
-                          {index + 1}
-                        </span>
-                      </div>
-                      <span className="text-foreground">{module}</span>
-                    </motion.li>
+                    <AccordionItem key={module.id} value={module.id}>
+                      <AccordionTrigger className="text-left">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-medium text-primary">
+                              {index + 1}
+                            </span>
+                          </div>
+                          <span className="font-medium">{module.title}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="space-y-2 ml-11 mt-2">
+                          {module.lessons.map((lesson) => (
+                            <li key={lesson.id}>
+                              <button
+                                onClick={() => {
+                                  if (isEnrolled) {
+                                    navigate(`/curso/${course.id}/modulo/${module.id}/aula/${lesson.id}`);
+                                  }
+                                }}
+                                disabled={!isEnrolled}
+                                className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                                  isEnrolled
+                                    ? "hover:bg-muted cursor-pointer"
+                                    : "opacity-50 cursor-not-allowed"
+                                }`}
+                              >
+                                <PlayCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{lesson.title}</p>
+                                  <p className="text-xs text-muted-foreground">{lesson.duration}</p>
+                                </div>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </ul>
+                </Accordion>
               </CardContent>
             </Card>
           </motion.div>
@@ -136,7 +163,7 @@ const CourseDetails = () => {
                   </div>
                 </div>
 
-                {!enrolled ? (
+                {!isEnrolled ? (
                   <Button className="w-full" size="lg" onClick={handleEnroll}>
                     Matricular-se neste curso
                   </Button>

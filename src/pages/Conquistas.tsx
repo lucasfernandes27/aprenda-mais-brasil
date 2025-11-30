@@ -1,17 +1,14 @@
-import { achievements } from "@/data/mockData";
 import ConquistaCard from "@/components/ConquistaCard";
+import { achievements } from "@/data/mockData";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
-import { motion } from "framer-motion";
 
 const Conquistas = () => {
-  // Simulate some unlocked achievements
-  const updatedAchievements = achievements.map((achievement, index) => ({
-    ...achievement,
-    unlocked: index < 2, // First 2 are unlocked
-  }));
+  const { user } = useAuth();
 
-  const unlockedCount = updatedAchievements.filter((a) => a.unlocked).length;
+  const unlockedCount = user?.unlockedAchievements.length || 0;
 
   return (
     <div className="min-h-screen bg-background py-24">
@@ -43,23 +40,21 @@ const Conquistas = () => {
           </Card>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {updatedAchievements.map((achievement, index) => (
-            <motion.div
-              key={achievement.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-            >
-              <ConquistaCard achievement={achievement} />
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {achievements.map((achievement, index) => {
+            const isUnlocked = user?.unlockedAchievements.includes(achievement.id);
+            return (
+              <motion.div
+                key={achievement.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <ConquistaCard achievement={{ ...achievement, unlocked: isUnlocked || false }} />
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
