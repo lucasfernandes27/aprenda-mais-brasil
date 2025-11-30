@@ -1,7 +1,7 @@
-// Camada de serviço para autenticação
-// Por enquanto usa localStorage, mas preparado para migrar para Supabase
+// Serviço de autenticação usando Supabase
+import { supabase } from "@/integrations/supabase/client";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -15,149 +15,164 @@ interface User {
   memberSince: string;
 }
 
-interface StoredUser extends User {
-  password: string;
-}
-
-// Futuramente, essas funções serão substituídas por chamadas ao Supabase
 export const authService = {
+  // Login com email e senha
   async login(email: string, password: string): Promise<{ user: User | null; error: string | null }> {
     try {
-      const usersData = localStorage.getItem("users");
-      const users = usersData ? JSON.parse(usersData) : {};
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      const userKey = email.toLowerCase();
-      const storedUser: StoredUser = users[userKey];
-
-      if (!storedUser) {
-        return { user: null, error: "Usuário não encontrado" };
+      if (authError) {
+        return { user: null, error: authError.message };
       }
 
-      if (storedUser.password !== password) {
-        return { user: null, error: "Senha incorreta" };
+      if (!authData.user) {
+        return { user: null, error: "Erro ao fazer login" };
       }
 
-      const userData: User = {
-        id: storedUser.id,
-        name: storedUser.name,
-        email: storedUser.email,
-        avatar: storedUser.avatar,
-        bio: storedUser.bio,
-        enrolledCourses: storedUser.enrolledCourses || [],
-        completedCourses: storedUser.completedCourses || [],
-        courseProgress: storedUser.courseProgress || {},
-        unlockedAchievements: storedUser.unlockedAchievements || [],
-        certificates: storedUser.certificates || [],
-        memberSince: storedUser.memberSince,
-      };
-
-      localStorage.setItem("currentUser", JSON.stringify(userData));
-      return { user: userData, error: null };
+      // Buscar dados do perfil
+      const user = await this.getCurrentUser();
+      return { user, error: null };
     } catch (error) {
+      console.error("Erro no login:", error);
       return { user: null, error: "Erro ao fazer login" };
     }
   },
 
+  // Cadastro de novo usuário
   async signup(
     name: string,
     email: string,
     password: string
   ): Promise<{ user: User | null; error: string | null }> {
     try {
-      const usersData = localStorage.getItem("users");
-      const users = usersData ? JSON.parse(usersData) : {};
-
-      const userKey = email.toLowerCase();
-
-      if (users[userKey]) {
-        return { user: null, error: "E-mail já cadastrado" };
-      }
-
-      const newUser: StoredUser = {
-        id: Date.now().toString(),
-        name,
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        avatar: "",
-        bio: "",
-        enrolledCourses: [],
-        completedCourses: [],
-        courseProgress: {},
-        unlockedAchievements: [],
-        certificates: [],
-        memberSince: new Date().toLocaleDateString("pt-BR", {
-          month: "long",
-          year: "numeric",
-        }),
-      };
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
 
-      users[userKey] = newUser;
-      localStorage.setItem("users", JSON.stringify(users));
+      if (authError) {
+        return { user: null, error: authError.message };
+      }
 
-      const userData: User = {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        avatar: newUser.avatar,
-        bio: newUser.bio,
-        enrolledCourses: [],
-        completedCourses: [],
-        courseProgress: {},
-        unlockedAchievements: [],
-        certificates: [],
-        memberSince: newUser.memberSince,
-      };
+      if (!authData.user) {
+        return { user: null, error: "Erro ao criar conta" };
+      }
 
-      localStorage.setItem("currentUser", JSON.stringify(userData));
-      return { user: userData, error: null };
+      // Aguardar um momento para o trigger criar o perfil
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Buscar o usuário recém-criado
+      const user = await this.getCurrentUser();
+      return { user, error: null };
     } catch (error) {
+      console.error("Erro no cadastro:", error);
       return { user: null, error: "Erro ao criar conta" };
     }
   },
 
+  // Obter usuário atual
   async getCurrentUser(): Promise<User | null> {
     try {
-      const storedUser = localStorage.getItem("currentUser");
-      if (storedUser) {
-        return JSON.parse(storedUser);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        return null;
       }
-      return null;
+
+      // Buscar perfil
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
+
+      if (!profile) {
+        return null;
+      }
+
+      // Buscar matrículas
+      const { data: enrollments } = await supabase
+        .from("course_enrollments")
+        .select("*")
+        .eq("user_id", authUser.id);
+
+      const enrolledCourses = enrollments?.map(e => e.course_id) || [];
+      const completedCourses = enrollments?.filter(e => e.progress === 100).map(e => e.course_id) || [];
+      const courseProgress: Record<string, number> = {};
+      enrollments?.forEach(e => {
+        courseProgress[e.course_id] = e.progress;
+      });
+
+      // Buscar conquistas
+      const { data: achievements } = await supabase
+        .from("user_achievements")
+        .select("achievement_id")
+        .eq("user_id", authUser.id);
+
+      const unlockedAchievements = achievements?.map(a => a.achievement_id) || [];
+
+      // Buscar certificados
+      const { data: certificates } = await supabase
+        .from("certificates")
+        .select("id")
+        .eq("user_id", authUser.id);
+
+      const certificateIds = certificates?.map(c => c.id) || [];
+
+      return {
+        id: authUser.id,
+        name: profile.name,
+        email: profile.email,
+        avatar: profile.avatar || undefined,
+        bio: profile.bio || undefined,
+        enrolledCourses,
+        completedCourses,
+        courseProgress,
+        unlockedAchievements,
+        certificates: certificateIds,
+        memberSince: profile.member_since,
+      };
     } catch (error) {
+      console.error("Erro ao buscar usuário atual:", error);
       return null;
     }
   },
 
+  // Atualizar usuário
   async updateUser(user: User): Promise<{ user: User | null; error: string | null }> {
     try {
-      localStorage.setItem("currentUser", JSON.stringify(user));
-
-      // Atualizar também no registro de usuários
-      const usersData = localStorage.getItem("users");
-      const users = usersData ? JSON.parse(usersData) : {};
-      const userKey = user.email.toLowerCase();
-
-      if (users[userKey]) {
-        users[userKey] = {
-          ...users[userKey],
+      const { error } = await supabase
+        .from("profiles")
+        .update({
           name: user.name,
           avatar: user.avatar,
           bio: user.bio,
-          enrolledCourses: user.enrolledCourses,
-          completedCourses: user.completedCourses,
-          courseProgress: user.courseProgress,
-          unlockedAchievements: user.unlockedAchievements,
-          certificates: user.certificates,
-        };
-        localStorage.setItem("users", JSON.stringify(users));
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        return { user: null, error: error.message };
       }
 
-      return { user, error: null };
+      // Buscar usuário atualizado
+      const updatedUser = await this.getCurrentUser();
+      return { user: updatedUser, error: null };
     } catch (error) {
-      return { user: null, error: "Erro ao atualizar usuário" };
+      console.error("Erro ao atualizar usuário:", error);
+      return { user: null, error: "Erro ao atualizar perfil" };
     }
   },
 
+  // Logout
   async logout(): Promise<void> {
-    localStorage.removeItem("currentUser");
+    await supabase.auth.signOut();
   },
 };

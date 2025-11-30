@@ -1,5 +1,5 @@
-// Serviço para gerenciamento de progresso de aulas
-// Preparado para integração futura com Supabase
+// Serviço para gerenciamento de progresso de aulas usando Supabase
+import { supabase } from "@/integrations/supabase/client";
 
 export interface LessonProgress {
   courseId: string;
@@ -12,8 +12,19 @@ export const progressService = {
   // Buscar progresso de todas as aulas de um usuário
   async getUserProgress(userId: string): Promise<LessonProgress[]> {
     try {
-      const progressData = localStorage.getItem(`progress_${userId}`);
-      return progressData ? JSON.parse(progressData) : [];
+      const { data, error } = await supabase
+        .from("lesson_progress")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      return data?.map(item => ({
+        courseId: item.course_id,
+        lessonId: item.lesson_id,
+        completed: item.completed,
+        completedAt: item.completed_at,
+      })) || [];
     } catch (error) {
       console.error("Erro ao buscar progresso:", error);
       return [];
@@ -27,26 +38,19 @@ export const progressService = {
     lessonId: string
   ): Promise<boolean> {
     try {
-      const progress = await this.getUserProgress(userId);
-      
-      // Verificar se já está marcada
-      const existingIndex = progress.findIndex(
-        (p) => p.courseId === courseId && p.lessonId === lessonId
-      );
-
-      if (existingIndex === -1) {
-        progress.push({
-          courseId,
-          lessonId,
+      const { error } = await supabase
+        .from("lesson_progress")
+        .upsert({
+          user_id: userId,
+          course_id: courseId,
+          lesson_id: lessonId,
           completed: true,
-          completedAt: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        }, {
+          onConflict: "user_id,course_id,lesson_id"
         });
-      } else {
-        progress[existingIndex].completed = true;
-        progress[existingIndex].completedAt = new Date().toISOString();
-      }
 
-      localStorage.setItem(`progress_${userId}`, JSON.stringify(progress));
+      if (error) throw error;
       return true;
     } catch (error) {
       console.error("Erro ao marcar aula como completa:", error);
@@ -61,13 +65,17 @@ export const progressService = {
     lessonId: string
   ): Promise<boolean> {
     try {
-      const progress = await this.getUserProgress(userId);
-      const lesson = progress.find(
-        (p) => p.courseId === courseId && p.lessonId === lessonId && p.completed
-      );
-      return !!lesson;
+      const { data, error } = await supabase
+        .from("lesson_progress")
+        .select("completed")
+        .eq("user_id", userId)
+        .eq("course_id", courseId)
+        .eq("lesson_id", lessonId)
+        .single();
+
+      if (error) return false;
+      return data?.completed || false;
     } catch (error) {
-      console.error("Erro ao verificar progresso da aula:", error);
       return false;
     }
   },
@@ -80,15 +88,19 @@ export const progressService = {
   ): Promise<number> {
     try {
       if (totalLessons === 0) return 0;
-      
-      const progress = await this.getUserProgress(userId);
-      const completedLessons = progress.filter(
-        (p) => p.courseId === courseId && p.completed
-      ).length;
 
-      // Usar Math.floor para evitar problemas de arredondamento
-      // e garantir que só chegue a 100% quando TODAS as aulas estiverem completas
+      const { data, error } = await supabase
+        .from("lesson_progress")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("course_id", courseId)
+        .eq("completed", true);
+
+      if (error) throw error;
+
+      const completedLessons = data?.length || 0;
       const percentage = (completedLessons / totalLessons) * 100;
+      
       return completedLessons === totalLessons ? 100 : Math.floor(percentage);
     } catch (error) {
       console.error("Erro ao calcular progresso do curso:", error);
@@ -99,10 +111,15 @@ export const progressService = {
   // Obter IDs das aulas completas de um curso
   async getCompletedLessonIds(userId: string, courseId: string): Promise<string[]> {
     try {
-      const progress = await this.getUserProgress(userId);
-      return progress
-        .filter((p) => p.courseId === courseId && p.completed)
-        .map((p) => p.lessonId);
+      const { data, error } = await supabase
+        .from("lesson_progress")
+        .select("lesson_id")
+        .eq("user_id", userId)
+        .eq("course_id", courseId)
+        .eq("completed", true);
+
+      if (error) throw error;
+      return data?.map(item => item.lesson_id) || [];
     } catch (error) {
       console.error("Erro ao buscar aulas completas:", error);
       return [];
