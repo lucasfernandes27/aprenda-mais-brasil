@@ -18,6 +18,27 @@ const EditProfileDialog = ({ open, onOpenChange, user, onSave }: EditProfileDial
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio || "");
   const [avatar, setAvatar] = useState(user.avatar || "");
+  const [previewAvatar, setPreviewAvatar] = useState(user.avatar || "");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Verificar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("A imagem deve ter no máximo 5MB");
+        return;
+      }
+
+      // Converter para base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setAvatar(base64String);
+        setPreviewAvatar(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = () => {
     onSave({
@@ -48,8 +69,8 @@ const EditProfileDialog = ({ open, onOpenChange, user, onSave }: EditProfileDial
         <div className="space-y-6 py-4">
           <div className="flex flex-col items-center gap-4">
             <Avatar className="w-24 h-24">
-              {avatar ? (
-                <img src={avatar} alt={name} className="object-cover" />
+              {previewAvatar ? (
+                <img src={previewAvatar} alt={name} className="object-cover" />
               ) : (
                 <AvatarFallback className="text-2xl bg-gradient-primary text-primary-foreground">
                   {initials}
@@ -57,15 +78,16 @@ const EditProfileDialog = ({ open, onOpenChange, user, onSave }: EditProfileDial
               )}
             </Avatar>
             <div className="w-full space-y-2">
-              <Label htmlFor="avatar">URL da foto de perfil</Label>
+              <Label htmlFor="avatar">Foto de perfil</Label>
               <Input
                 id="avatar"
-                value={avatar}
-                onChange={(e) => setAvatar(e.target.value)}
-                placeholder="https://exemplo.com/foto.jpg"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="cursor-pointer"
               />
               <p className="text-xs text-muted-foreground">
-                Cole o link de uma imagem para usar como foto de perfil
+                Escolha uma imagem (máximo 5MB). A foto será salva e persistirá após recarregar a página.
               </p>
             </div>
           </div>
