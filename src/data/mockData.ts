@@ -37,7 +37,8 @@ export const courses: Course[] = [
     id: "1",
     title: "Excel para Iniciantes",
     description: "Aprenda o básico do Excel: formatação, fórmulas simples e organização de dados.",
-    fullDescription: "Neste curso você aprenderá desde o básico do Excel, incluindo navegação pela interface, formatação de células, criação de fórmulas básicas e organização de dados em planilhas. Perfeito para quem está começando.",
+    fullDescription:
+      "Neste curso você aprenderá desde o básico do Excel, incluindo navegação pela interface, formatação de células, criação de fórmulas básicas e organização de dados em planilhas. Perfeito para quem está começando.",
     category: "Pacote Office",
     level: "Iniciante",
     duration: "8 horas",
@@ -49,14 +50,14 @@ export const courses: Course[] = [
           {
             id: "1-1-1",
             title: "Interface e primeiros passos",
-            videoUrl: "https://www.youtube.com/embed/3u3W5JY5cXQ",
-            duration: "15 min"
+            videoUrl: "https://www.youtube.com/embed/qQLT_uoMN0U",
+            duration: "11 min"
           },
           {
             id: "1-1-2",
-            title: "Navegação básica",
-            videoUrl: "https://www.youtube.com/embed/I6S5xQ8G3Hc",
-            duration: "12 min"
+            title: "Operando na planilha",
+            videoUrl: "https://www.youtube.com/embed/7h5ZesJZ9o8",
+            duration: "8 min"
           }
         ]
       },
@@ -66,9 +67,9 @@ export const courses: Course[] = [
         lessons: [
           {
             id: "1-2-1",
-            title: "Formatação básica",
-            videoUrl: "https://www.youtube.com/embed/3u3W5JY5cXQ",
-            duration: "18 min"
+            title: "Formatação da Planilha",
+            videoUrl: "https://www.youtube.com/embed/Qj5ar291SHM",
+            duration: "11 min"
           }
         ]
       },
@@ -79,13 +80,13 @@ export const courses: Course[] = [
           {
             id: "1-3-1",
             title: "Função SOMA",
-            videoUrl: "https://www.youtube.com/embed/I6S5xQ8G3Hc",
+            videoUrl: "https://www.youtube.com/embed/ksT1bSwzreo",
             duration: "20 min"
           },
           {
             id: "1-3-2",
             title: "Função MÉDIA",
-            videoUrl: "https://www.youtube.com/embed/3u3W5JY5cXQ",
+            videoUrl: "https://www.youtube.com/embed/I2taMQ3j6qo",
             duration: "15 min"
           }
         ]
@@ -97,7 +98,7 @@ export const courses: Course[] = [
           {
             id: "1-4-1",
             title: "Ordenação e filtros",
-            videoUrl: "https://www.youtube.com/embed/I6S5xQ8G3Hc",
+            videoUrl: "https://www.youtube.com/embed/OHM4CJbea54",
             duration: "22 min"
           }
         ]
@@ -109,18 +110,21 @@ export const courses: Course[] = [
           {
             id: "1-5-1",
             title: "Criando seu primeiro gráfico",
-            videoUrl: "https://www.youtube.com/embed/3u3W5JY5cXQ",
+            videoUrl: "https://www.youtube.com/embed/MgC-Kn4RUtI",
             duration: "25 min"
           }
         ]
       }
     ]
   },
+
   {
     id: "2",
     title: "Excel Avançado para Análise de Dados",
-    description: "Domine fórmulas avançadas, tabelas dinâmicas e análise de grandes volumes de dados.",
-    fullDescription: "Aprenda técnicas avançadas de Excel para análise profissional de dados. Inclui PROCV, PROCX, tabelas dinâmicas, formatação condicional avançada e muito mais.",
+    description:
+      "Domine fórmulas avançadas, tabelas dinâmicas e análise de grandes volumes de dados.",
+    fullDescription:
+      "Aprenda técnicas avançadas de Excel para análise profissional de dados. Inclui PROCV, PROCX, tabelas dinâmicas, formatação condicional avançada e muito mais.",
     category: "Pacote Office",
     level: "Avançado",
     duration: "16 horas",
@@ -205,11 +209,14 @@ export const courses: Course[] = [
       }
     ]
   },
+
   {
     id: "3",
     title: "Word Essencial para o Dia a Dia",
-    description: "Crie documentos profissionais com formatação adequada e recursos avançados do Word.",
-    fullDescription: "Domine o Word para criar documentos profissionais. Aprenda sobre estilos, formatação, índices automáticos e muito mais.",
+    description:
+      "Crie documentos profissionais com formatação adequada e recursos avançados do Word.",
+    fullDescription:
+      "Domine o Word para criar documentos profissionais. Aprenda sobre estilos, formatação, índices automáticos e muito mais.",
     category: "Pacote Office",
     level: "Intermediário",
     duration: "6 horas",
@@ -282,11 +289,14 @@ export const courses: Course[] = [
       }
     ]
   },
+
   {
     id: "4",
     title: "Apresentações Profissionais com PowerPoint",
-    description: "Crie apresentações impactantes com design moderno e storytelling eficaz.",
-    fullDescription: "Aprenda a criar apresentações que prendem a atenção. Desde design de slides até técnicas de apresentação e storytelling visual.",
+    description:
+      "Crie apresentações impactantes com design moderno e storytelling eficaz.",
+    fullDescription:
+      "Aprenda a criar apresentações que prendem a atenção. Desde design de slides até técnicas de apresentação e storytelling visual.",
     category: "Pacote Office",
     level: "Intermediário",
     duration: "10 horas",
@@ -359,11 +369,14 @@ export const courses: Course[] = [
       }
     ]
   },
+
   {
     id: "5",
     title: "Produtividade com Google Workspace",
-    description: "Maximize sua produtividade com Gmail, Google Drive, Docs e Sheets.",
-    fullDescription: "Aprenda a usar as ferramentas do Google Workspace de forma profissional para aumentar sua produtividade no trabalho.",
+    description:
+      "Maximize sua produtividade com Gmail, Google Drive, Docs e Sheets.",
+    fullDescription:
+      "Aprenda a usar as ferramentas do Google Workspace de forma profissional para aumentar sua produtividade no trabalho.",
     category: "Produtividade",
     level: "Iniciante",
     duration: "8 horas",
@@ -430,11 +443,14 @@ export const courses: Course[] = [
       }
     ]
   },
+
   {
     id: "6",
     title: "Gestão de Tempo e Organização Pessoal",
-    description: "Técnicas comprovadas para gerenciar seu tempo e aumentar sua produtividade.",
-    fullDescription: "Descubra métodos práticos para organizar suas tarefas, gerenciar projetos pessoais e profissionais, e alcançar seus objetivos.",
+    description:
+      "Técnicas comprovadas para gerenciar seu tempo e aumentar sua produtividade.",
+    fullDescription:
+      "Descubra métodos práticos para organizar suas tarefas, gerenciar projetos pessoais e profissionais, e alcançar seus objetivos.",
     category: "Produtividade",
     level: "Iniciante",
     duration: "5 horas",
