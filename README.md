@@ -17,6 +17,7 @@ O sistema funciona como um portal interno onde:
 # 🚀 Aprenda Mais Brasil - Guia Completo de Deploy
 
 ## 📋 Índice
+
 - [Visão Geral](#visão-geral)
 - [Arquitetura do Projeto](#arquitetura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
@@ -30,6 +31,7 @@ O sistema funciona como um portal interno onde:
 ## 🎯 Visão Geral
 
 Este projeto é uma aplicação React + Vite com infraestrutura completa de monitoramento usando:
+
 - **Frontend:** React + Vite servido por Nginx
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
 - **Monitoramento:** Zabbix + Grafana
@@ -94,6 +96,7 @@ Este projeto é uma aplicação React + Vite com infraestrutura completa de moni
 ## ✅ Pré-requisitos
 
 ### Ferramentas Necessárias
+
 ```bash
 # Verificar instalações
 node --version    # v18 ou superior
@@ -106,11 +109,13 @@ az --version      # Azure CLI v2.50 ou superior
 ### Instalar Ferramentas
 
 **Docker Desktop (Windows/Mac):**
+
 ```bash
 # Download: https://www.docker.com/products/docker-desktop
 ```
 
 **Azure CLI:**
+
 ```bash
 # Windows (PowerShell como Admin):
 winget install Microsoft.AzureCLI
@@ -151,16 +156,16 @@ cat > nginx.conf << 'EOF'
 server {
     # Escuta requisições HTTP na porta 80
     listen 80;
-    
+
     # Define o nome do servidor (localhost para desenvolvimento)
     server_name localhost;
-    
+
     # Diretório raiz onde estão os arquivos buildados
     root /usr/share/nginx/html;
-    
+
     # Arquivo padrão a ser servido
     index index.html;
-    
+
     # Configuração para Single Page Application (SPA)
     # Todas as rotas são redirecionadas para index.html
     # Isso permite que o React Router funcione corretamente
@@ -170,19 +175,19 @@ server {
         # Se ainda assim falhar, serve o index.html
         try_files $uri $uri/ /index.html;
     }
-    
+
     # Configuração de cache para assets estáticos
     # Aplica-se a arquivos JS, CSS, imagens, etc.
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
         # Cache por 1 ano (máximo recomendado)
         expires 1y;
-        
+
         # Adiciona header de controle de cache
         # "public" = pode ser cacheado por CDNs
         # "immutable" = arquivo nunca muda (requer novo nome para atualizar)
         add_header Cache-Control "public, immutable";
     }
-    
+
     # Compressão gzip para melhor performance
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
@@ -264,55 +269,59 @@ docker-compose config
 ```
 
 **Serviço: app (Sua aplicação React)**
+
 ```yaml
 app:
   build:
-    context: .              # Usa diretório atual
-    dockerfile: Dockerfile  # Arquivo de build
-    args:                   # Passa secrets como argumentos
+    context: . # Usa diretório atual
+    dockerfile: Dockerfile # Arquivo de build
+    args: # Passa secrets como argumentos
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
   container_name: aprenda-mais-app
   ports:
-    - "3000:80"  # Host:Container (acessa via localhost:3000)
+    - "3000:80" # Host:Container (acessa via localhost:3000)
   networks:
-    - monitoring  # Conecta à rede interna
-  restart: unless-stopped  # Reinicia sempre, exceto parada manual
+    - monitoring # Conecta à rede interna
+  restart: unless-stopped # Reinicia sempre, exceto parada manual
 ```
 
 **Serviço: postgres-zabbix (Banco de dados)**
+
 ```yaml
 postgres-zabbix:
-  image: postgres:15-alpine  # Imagem pronta do Docker Hub
+  image: postgres:15-alpine # Imagem pronta do Docker Hub
   environment:
     POSTGRES_USER: zabbix
     POSTGRES_PASSWORD: zabbix_pwd
     POSTGRES_DB: zabbix
   volumes:
-    - postgres-data:/var/lib/postgresql/data  # Persistência
+    - postgres-data:/var/lib/postgresql/data # Persistência
   # Volume nomeado = dados sobrevivem mesmo se container for deletado
 ```
 
 **Serviço: zabbix-server (Motor de monitoramento)**
+
 ```yaml
 zabbix-server:
   environment:
-    DB_SERVER_HOST: postgres-zabbix  # DNS interno do Docker
+    DB_SERVER_HOST: postgres-zabbix # DNS interno do Docker
   depends_on:
-    - postgres-zabbix  # Espera banco iniciar primeiro
+    - postgres-zabbix # Espera banco iniciar primeiro
   ports:
-    - "10051:10051"  # Porta para agentes enviarem dados
+    - "10051:10051" # Porta para agentes enviarem dados
 ```
 
 **Serviço: zabbix-agent (Coletor de métricas)**
+
 ```yaml
 zabbix-agent:
-  privileged: true  # Acesso elevado ao sistema
-  pid: host         # Compartilha namespace de processos com host
+  privileged: true # Acesso elevado ao sistema
+  pid: host # Compartilha namespace de processos com host
   volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro  # Monitora containers
-    - /proc:/host/proc:ro   # CPU, memória, processos
-    - /sys:/host/sys:ro     # Hardware, temperatura
-    - /:/rootfs:ro          # Sistema de arquivos
+    - /var/run/docker.sock:/var/run/docker.sock:ro # Monitora containers
+    - /proc:/host/proc:ro # CPU, memória, processos
+    - /sys:/host/sys:ro # Hardware, temperatura
+    - /:/rootfs:ro # Sistema de arquivos
   # :ro = read-only (segurança)
 ```
 
@@ -616,7 +625,7 @@ http://aprenda-mais-zabbix.brazilsouth.azurecontainer.io:8080
 Configuration → Hosts → Create Host
   Host name: Aprenda Mais App
   Groups: Applications
-  Interfaces: 
+  Interfaces:
     - Type: Agent
     - IP: [IP do container app]
     - Port: 10050
@@ -656,7 +665,7 @@ Dashboards → Import
 
 # 4. Criar Dashboard Customizado
 + → Dashboard → Add new panel
-  Query: 
+  Query:
     - Métricas: CPU, memória, requests/s
     - Visualizações: Graph, Gauge, Stat
 ```
@@ -668,6 +677,7 @@ Dashboards → Import
 ### Problemas Comuns - Docker Local
 
 **Container não inicia:**
+
 ```bash
 # Ver logs detalhados
 docker-compose logs app
@@ -682,6 +692,7 @@ docker-compose up -d app
 ```
 
 **Porta já em uso:**
+
 ```bash
 # Identificar processo usando porta 3000
 lsof -i :3000  # Mac/Linux
@@ -693,6 +704,7 @@ ports:
 ```
 
 **Problema de permissão (Linux):**
+
 ```bash
 # Adicionar usuário ao grupo docker
 sudo usermod -aG docker $USER
@@ -707,6 +719,7 @@ docker ps
 ### Problemas Comuns - Azure
 
 **Push para ACR falha:**
+
 ```bash
 # Verificar login
 az acr login --name aprendamaisacr
@@ -721,6 +734,7 @@ docker login aprendamaisacr.azurecr.io \
 ```
 
 **Container não inicia na Azure:**
+
 ```bash
 # Ver logs
 az container logs \
@@ -739,6 +753,7 @@ az container create ... --memory 2
 ```
 
 **Site não carrega (erro 502):**
+
 ```bash
 # Verificar health
 az container show \
@@ -783,6 +798,22 @@ az group delete \
   --yes --no-wait
 ```
 
+# 📘 API – Aprenda Mais Brasil
+
+Esta documentação descreve como consumir a API do Aprenda Mais Brasil usando o backend do Supabase (REST) e a Edge Function `data-api`.
+
+---
+
+## 🔑 Autenticação
+
+Todas as requisições à API devem incluir:
+
+```http
+apikey:        <SUPABASE_ANON_KEY ou SERVICE_ROLE_KEY>
+Authorization: Bearer <TOKEN>
+Content-Type:  application/json
+Accept:        application/json
+
 ---
 
 ## 📚 Referências
@@ -806,3 +837,4 @@ az group delete \
 ## 📄 Licença
 
 MIT License - veja [LICENSE](LICENSE) para detalhes.
+```
